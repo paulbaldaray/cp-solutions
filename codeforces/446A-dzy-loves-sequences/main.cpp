@@ -12,7 +12,7 @@ int main() {
 				arr1 < arr0 ? dp_one_delta+1 : 1), // carry from skip
 				i > 1 ? 2 : 0 // make the one before one lower
 				);
-		ans = std::max(ans, std::max(std::max(dp_zero, dp_zero_delta), dp_one + 1));
+		ans = std::max(ans, std::max(std::max(dp_zero, dp_zero_delta), dp_one + 1 /* end here */));
 		arr2 = arr1, arr1 = arr0;
 		dp_two = dp_one, dp_one = dp_zero, dp_one_delta = dp_zero_delta;
 	}
