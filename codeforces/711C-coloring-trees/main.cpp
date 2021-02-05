@@ -24,5 +24,5 @@ int main() {
 					for (int c = 1; c <= M; ++c)
 						dp[i][j][k] = std::min(dp[i][j][k], dp[i+1][c][k+(c!=j)] + cost[i][c]);
 			}
-	std::cout << (dp[1][0][0] == 1e16 ? -1 : dp[1][0][0]) << '\n';
+	std::cout << (dp[1][0][0] == INF ? -1 : dp[1][0][0]) << '\n';
 }
