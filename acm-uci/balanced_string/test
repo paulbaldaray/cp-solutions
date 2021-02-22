@@ -1,0 +1,18 @@
+#!/bin/sh
+g++ -std=c++11 main.cpp
+file='1.in'
+echo Testing: Random Case
+echo Paul CPP
+command time -f "%es" ./a.out < "$file" > /dev/null
+echo Paul PY
+command time  -f "%es" python3 paul.py < "$file" > /dev/null
+echo Ryan PY
+command time  -f "%es" python3 ryan.py <  "$file" > /dev/null
+file='0.in'
+echo Testing: Edge Case
+echo Paul CPP
+command time -f "%es" ./a.out < "$file" > /dev/null
+echo Paul PY
+command time  -f "%es" python3 paul.py < "$file" > /dev/null
+echo Ryan PY
+command time  -f "%es" python3 ryan.py <  "$file" > /dev/null
