@@ -1,15 +1,26 @@
+#include <map>
+#include <tuple>
+#include <functional>
+#define MEMOIZE(FName, RType, ...)\
+std::function<RType (__VA_ARGS__)> _##FName;\
+std::map<std::tuple<__VA_ARGS__>, RType> _memo_##FName;\
+template <typename... Args>\
+RType FName(Args... args){\
+	auto state = std::make_tuple(args...);\
+	if (_memo_##FName.count(state))\
+			return _memo_##FName[state];\
+	return _memo_##FName[state] = _##FName(args...);\
+}
+
 #include <iostream>
 #include <string>
 #include <cstdio>
 #include <vector>
-#include <functional>
-#include <map>
-#include <set>
-#include <cassert>
-#define F first
-#define S second
 typedef double FT;
-typedef std::pair<int, int> PII;
+
+MEMOIZE(bestHint, FT, int);
+MEMOIZE(probHint, FT, int, int);
+
 int main() {
 	int N, M;
 	char team;
@@ -33,13 +44,6 @@ int main() {
 			hints[i].push_back(code[name]);
 		}
 	}
-	auto pbs = [&](int bs)->void{
-		printf("%s(%d): ", (bs&1 ? "OPP": "TEAM"), bs);
-		for (int i = 1; i <= N; ++i)
-		if (bs&(1<<i))
-				printf("%d ", i);
-		printf("\n");
-	};
 	auto same_team = [&](char c, int bs) -> bool {
 		if (c == 'A' || c == 'I')
 			return false;
@@ -63,52 +67,28 @@ int main() {
 		return ans;
 	};
 
-	/* { */
-		/* printf("I am on team %c.\n", team); */
-		/* printf("The board consists of:\n"); */
-		/* for (int i = 1; i <= N; ++i) */
-		/* 	printf("%d%c\n", i, type[i]); */
-		/* printf("These are the hints:\n"); */
-		/* for (int i = 1; i <= M; ++i) { */
-		/* 	printf("Hint %d: %d%c", i, hints[i][0], type[hints[i][0]]); */
-		/* 	for (int j = 1; j < hints[i].size(); ++j) { */
-		/* 		int w = hints[i][j]; */
-		/* 		printf(", %d%c", w, type[w]); */
-		/* 	} */
-		/* 	printf("\n"); */
-		/* } */
-	/* } */
-
-	/*dfjka sdjfkdsj*/
-
-		std::map<int, FT> memo1;
-		std::map<PII, FT> memo2;
-		std::function<FT (int bs)> bestHint;
-		std::function<FT (int bs, int h)> probHint;
-		bestHint = [&](int bs) {
-			if (memo1.count(bs))
-				return memo1[bs];
+		_bestHint = [&](int bs) {
 			if (hasWon(bs))
-				return memo1[bs] = 1.0;
+				return 1.0;
+			FT ans = 0.0;
 			for (int h = 1; h <= M; ++h)
 				if (count(bs, h))
-					memo1[bs] = std::max(memo1[bs], probHint(bs, h));
-			return memo1[bs];
+					ans = std::max(ans, probHint(bs, h));
+			return ans;
 		};
-		probHint = [&](int bs, int h) {
-			if (memo2.count(PII(bs, h)))
-				return memo2[PII(bs, h)];
+		_probHint = [&](int bs, int h) {
 			if (hasWon(bs))
-				return memo2[PII(bs, h)] = 1.0;
+				return 1.0;
 			if (count(bs, h) == 0)
-				return memo2[PII(bs, h)] = 1-bestHint(bs^1);
+				return 1-bestHint(bs^1);
+			FT ans = 0.0;
 			for (int w : hints[h]) if (!(bs&(1<<w))) {
 				if (same_team(type[w], bs))
-					memo2[PII(bs, h)] += probHint(bs|(1<<w), h);
+					ans += probHint(bs|(1<<w), h);
 				else
-					memo2[PII(bs, h)] += 1-bestHint((bs|(1<<w))^1);
+					ans += 1-bestHint((bs|(1<<w))^1);
 			}
-			return memo2[PII(bs, h)]/count(bs, h);
+			return ans/count(bs, h);
 		};
 		std::cout << bestHint(0) << '\n';
 }
