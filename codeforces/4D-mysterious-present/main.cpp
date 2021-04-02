@@ -8,31 +8,41 @@ typedef std::pair<pii, int> piii;
 int main() {
 	int n, w, h;
 	std::cin >> n >> w >> h;
-	std::vector<piii> envs, higher_envs;
+	std::vector<piii> envs;
 	for (int i = 0; i < n; ++i) {
 		piii e;
 		std::cin >> e.F.F >> e.F.S;
-		e.S = i;
+		e.S = i+1;
 		if (w < e.F.F && h < e.F.S)
 			envs.push_back(e);
 	}
-	int high = 0;
-	std::vector<int> dp(n, 0), backptr(n, -1);
-	std::sort(envs.begin(), envs.end(), std::greater<piii>());
-	for (piii &e1 : envs) {
-		dp[e1.S] = 1;
-		for (piii &e2 : higher_envs)
-			if (e1.F.F < e2.F.F && e1.F.S < e2.F.S && dp[e2.S] >= dp[e1.S])
-				dp[e1.S] = dp[e2.S]+1, backptr[e1.S] = e2.S;
-		if (dp[e1.S] > dp[high])
-			high = e1.S;
-		higher_envs.push_back(e1);
+	if (envs.empty()) {
+		std::cout << 0 << '\n';
+		return 0;
 	}
-	std::cout << dp[high] << '\n';
-	while (backptr[high] != -1) {
-		std::cout << high+1 << ' ';
-		high = backptr[high];
+	std::sort(envs.begin(), envs.end());
+	std::vector<int> dp, bptr(envs.size(), -1), ans;
+	for (int i = 0; i < envs.size(); ++i) {
+		int l = 0, r = dp.size(), orig = dp.size();
+		while (l < r) {
+			int m = l + (r-l) / 2;
+			if (envs[dp[m]].F.S >= envs[i].F.S)
+				r = m;
+			else
+				l = m + 1;
+		}
+		bool has_diff_width = !l || envs[dp[l-1]].F.F < envs[i].F.F;
+		if (l == dp.size() && has_diff_width)
+			dp.push_back(i);
+		else if (l < dp.size() && has_diff_width && envs[i].F.S < envs[dp[l]].F.S)
+			dp[l] = i;
+		bptr[i] = l ? dp[l-1] : -1;
 	}
-	if (!envs.empty())
-		std::cout << high+1 << '\n';
+	std::cout << dp.size() << '\n';
+	for (int ptr = dp.back(); ptr != -1; ptr = bptr[ptr])
+		ans.push_back(envs[ptr].S);
+	for (int i = ans.size()-1; i >= 0; --i)
+		std::cout << ans[i] << ' ';
+	std::cout << '\n';
 }
+
