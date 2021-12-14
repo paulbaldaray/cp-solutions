@@ -1,0 +1,9 @@
+#!/bin/bash
+names=("Python" "C++" "Java")
+programs=("python3 main.py" "./a.out" "java Main")
+src=("main.py" "main.cpp" "Main.java")
+for i in $(seq 0 2); do
+  echo -n "${names[$i]}: Lines of code = $(cat ${src[$i]} | wc -l)"
+  time $(echo -n ${programs[$i]}) < 2.in > /dev/null
+  echo
+done
